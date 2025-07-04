@@ -29,7 +29,7 @@ if (isFirebaseConfigured()) {
         console.error("Failed to initialize Firebase", e);
     }
 } else {
-    console.warn("Firebase configuration is missing. Please set up your .env.local file with your Firebase project credentials. The app will not connect to Firebase.");
+    console.warn("Firebase configuration is missing. If running locally, please set up your .env.local file. If deploying, set the environment variables in your hosting provider's settings. The app will not connect to Firebase.");
 }
 
 export { db, storage, app };
