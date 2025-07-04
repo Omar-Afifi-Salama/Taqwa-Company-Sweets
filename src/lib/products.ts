@@ -5,10 +5,10 @@ export type Product = {
 };
 
 export const products: Product[] = [
-    { id: 'chicken_shawarma', name: 'Chicken Shawarma', price: 50 },
-    { id: 'beef_burger', name: 'Beef Burger', price: 60 },
-    { id: 'koshary', name: 'Koshary', price: 30 },
-    { id: 'fries', name: 'Fries', price: 20 },
-    { id: 'cola', name: 'Cola', price: 15 },
-    { id: 'water', name: 'Water', price: 10 },
+    { id: 'nutella', name: 'Nutella', price: 45 },
+    { id: 'white_chocolate', name: 'White Chocolate', price: 45 },
+    { id: 'lotus', name: 'Lotus', price: 45 },
+    { id: 'kit_kat', name: 'Kit-Kat', price: 40 },
+    { id: 'caramel', name: 'Caramel', price: 40 },
+    { id: 'brownie', name: 'Brownie', price: 35 },
 ];

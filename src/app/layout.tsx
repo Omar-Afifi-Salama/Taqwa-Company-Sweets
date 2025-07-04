@@ -3,8 +3,8 @@ import { Toaster } from "@/components/ui/toaster";
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Taqwa HQ',
-  description: 'الموقع الرسمي لشركة التقوى',
+  title: 'Sweet Treats Corner',
+  description: 'Your one-stop shop for delicious treats!',
 };
 
 export default function RootLayout({

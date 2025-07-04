@@ -26,12 +26,12 @@ import { Separator } from "@/components/ui/separator";
 import { isFirebaseConfigured } from "@/lib/firebase";
 
 const formSchema = z.object({
-  chicken_shawarma: z.coerce.number().int().min(0).default(0),
-  beef_burger: z.coerce.number().int().min(0).default(0),
-  koshary: z.coerce.number().int().min(0).default(0),
-  fries: z.coerce.number().int().min(0).default(0),
-  cola: z.coerce.number().int().min(0).default(0),
-  water: z.coerce.number().int().min(0).default(0),
+  nutella: z.coerce.number().int().min(0).default(0),
+  white_chocolate: z.coerce.number().int().min(0).default(0),
+  lotus: z.coerce.number().int().min(0).default(0),
+  kit_kat: z.coerce.number().int().min(0).default(0),
+  caramel: z.coerce.number().int().min(0).default(0),
+  brownie: z.coerce.number().int().min(0).default(0),
   dormNumber: z.string().min(1, { message: "Dorm number is required." }),
   receipt: z.any()
     .refine((files) => files?.length >= 1, "Receipt image is required.")
@@ -53,12 +53,12 @@ export function OrderForm({ products }: { products: Product[] }) {
   const form = useForm<OrderFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      chicken_shawarma: 0,
-      beef_burger: 0,
-      koshary: 0,
-      fries: 0,
-      cola: 0,
-      water: 0,
+      nutella: 0,
+      white_chocolate: 0,
+      lotus: 0,
+      kit_kat: 0,
+      caramel: 0,
+      brownie: 0,
       dormNumber: "",
     },
   });
@@ -186,7 +186,7 @@ export function OrderForm({ products }: { products: Product[] }) {
                 <p className="font-semibold">Instructions:</p>
                 <ol className="list-decimal list-inside text-muted-foreground space-y-1 mt-2">
                     <li>Calculate your total bill below.</li>
-                    <li>Send the total amount via Vodafone Cash to <strong className="text-primary">01012345678</strong>.</li>
+                    <li>Send the total amount via Vodafone Cash to <strong className="text-primary">01127494696</strong>.</li>
                     <li>Take a screenshot of the transaction confirmation.</li>
                     <li>Upload the screenshot below as proof of payment.</li>
                 </ol>
