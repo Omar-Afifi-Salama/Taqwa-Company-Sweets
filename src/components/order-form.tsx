@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
+import Image from "next/image";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Minus, Plus } from "lucide-react";
 
 import type { Product } from "@/lib/products";
-import { products } from "@/lib/products";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,15 +23,15 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { submitOrder } from "@/app/actions";
 import { useToast } from "@/hooks/use-toast";
-import { Separator } from "@/components/ui/separator";
 import { isFirebaseConfigured } from "@/lib/firebase";
 
 const formSchema = z.object({
   tiramisu_nutella: z.coerce.number().int().min(0).default(0),
   tiramisu_white_chocolate: z.coerce.number().int().min(0).default(0),
   tiramisu_lotus: z.coerce.number().int().min(0).default(0),
-  tiramisu_kit_kat: z.coerce.number().int().min(0).default(0),
-  dormNumber: z.string().min(1, { message: "Dorm number is required." }).regex(/^[0-9]+$/, { message: "Only numbers are allowed." }),
+  tiramisu_pistachio: z.coerce.number().int().min(0).default(0),
+  name: z.string().min(1, { message: "Name is required." }),
+  dormNumber: z.string().length(3, {message: "Dorm number must be 3 digits."}).regex(/^[0-9]+$/, { message: "Only numbers are allowed." }),
   receipt: z.any()
     .refine((files) => files?.length >= 1, "Receipt image is required.")
     .refine((files) => files?.[0]?.size <= 5000000, `Max file size is 5MB.`)
@@ -55,7 +55,8 @@ export function OrderForm({ products }: { products: Product[] }) {
       tiramisu_nutella: 0,
       tiramisu_white_chocolate: 0,
       tiramisu_lotus: 0,
-      tiramisu_kit_kat: 0,
+      tiramisu_pistachio: 0,
+      name: "",
       dormNumber: "",
     },
   });
@@ -112,103 +113,134 @@ export function OrderForm({ products }: { products: Product[] }) {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <fieldset disabled={!firebaseConfigured} className="space-y-8">
             <Card>
-            <CardHeader>
-                <CardTitle>Create Your Order</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {products.map((product) => (
+                <CardHeader>
+                    <CardTitle>Create Your Order</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {products.map((product) => (
+                        <Card key={product.id} className="overflow-hidden flex flex-col">
+                             <div className="relative aspect-video w-full">
+                                <Image src={product.image} alt={product.name} layout="fill" objectFit="cover" data-ai-hint={product.dataAiHint} />
+                            </div>
+                            <div className="p-4 space-y-4 flex flex-col flex-grow">
+                                <FormField
+                                    control={form.control}
+                                    name={product.id as keyof OrderFormValues}
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-col flex-grow">
+                                            <div className="flex justify-between items-baseline">
+                                                <FormLabel className="text-lg font-semibold">{product.name}</FormLabel>
+                                                <p className="text-primary font-bold">{product.price} EGP</p>
+                                            </div>
+                                            <div className="mt-auto pt-4">
+                                                <FormControl>
+                                                    <div className="flex items-center gap-2">
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        size="icon"
+                                                        className="h-10 w-10 shrink-0"
+                                                        onClick={() => field.onChange(Math.max(0, (field.value || 0) - 1))}
+                                                    >
+                                                        <Minus className="h-4 w-4" />
+                                                    </Button>
+                                                    <Input {...field} type="number" min="0" className="text-center" onChange={(e) => {
+                                                        const val = parseInt(e.target.value, 10);
+                                                        field.onChange(isNaN(val) ? 0 : val);
+                                                    }} />
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        size="icon"
+                                                        className="h-10 w-10 shrink-0"
+                                                        onClick={() => field.onChange((field.value || 0) + 1)}
+                                                    >
+                                                        <Plus className="h-4 w-4" />
+                                                    </Button>
+                                                    </div>
+                                                </FormControl>
+                                            </div>
+                                            <FormMessage className="pt-2"/>
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
+                        </Card>
+                    ))}
+                    </div>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>Delivery Details</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
                     <FormField
-                    key={product.id}
                     control={form.control}
-                    name={product.id as keyof OrderFormValues}
+                    name="name"
                     render={({ field }) => (
                         <FormItem>
-                        <FormLabel className="flex justify-between items-center">
-                            <span>{product.name}</span>
-                            <span className="text-muted-foreground font-normal">{product.price} EGP</span>
-                        </FormLabel>
+                        <FormLabel>Full Name</FormLabel>
                         <FormControl>
-                            <div className="flex items-center gap-2">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                size="icon"
-                                className="h-10 w-10"
-                                onClick={() => field.onChange(Math.max(0, field.value - 1))}
-                            >
-                                <Minus className="h-4 w-4" />
-                            </Button>
-                            <Input {...field} type="number" min="0" className="text-center" />
-                            <Button
-                                type="button"
-                                variant="outline"
-                                size="icon"
-                                className="h-10 w-10"
-                                onClick={() => field.onChange(field.value + 1)}
-                            >
-                                <Plus className="h-4 w-4" />
-                            </Button>
-                            </div>
+                            <Input placeholder="John Doe" {...field} />
                         </FormControl>
                         <FormMessage />
                         </FormItem>
                     )}
                     />
-                ))}
-                </div>
-                <Separator />
-                <FormField
-                control={form.control}
-                name="dormNumber"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Dorm Number</FormLabel>
-                    <FormControl>
-                        <Input placeholder="302" type="text" inputMode="numeric" pattern="[0-9]*" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                    </FormItem>
-                )}
-                />
-            </CardContent>
+                    <FormField
+                    control={form.control}
+                    name="dormNumber"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Dorm Number</FormLabel>
+                        <FormControl>
+                            <Input placeholder="302" type="text" inputMode="numeric" maxLength={3} {...field} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                </CardContent>
             </Card>
 
             <Card>
-            <CardHeader>
-                <CardTitle>Payment</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                <div>
-                <p className="font-semibold">Instructions:</p>
-                <ol className="list-decimal list-inside text-muted-foreground space-y-1 mt-2">
-                    <li>Calculate your total bill below.</li>
-                    <li>Send the total amount via Vodafone Cash to <strong className="text-primary">01127494696</strong>.</li>
-                    <li>Take a screenshot of the transaction confirmation.</li>
-                    <li>Upload the screenshot below as proof of payment.</li>
-                </ol>
-                </div>
-                <FormField
-                control={form.control}
-                name="receipt"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Upload Receipt Screenshot</FormLabel>
-                    <FormControl>
-                        <Input type="file" {...receiptRef} />
-                    </FormControl>
-                    <FormDescription>
-                        Please upload the screenshot of your Vodafone Cash transaction.
-                    </FormDescription>
-                    <FormMessage />
-                    </FormItem>
-                )}
-                />
-            </CardContent>
+                <CardHeader>
+                    <CardTitle>Payment</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div>
+                    <p className="font-semibold">Instructions:</p>
+                    <ol className="list-decimal list-inside text-muted-foreground space-y-1 mt-2">
+                        <li>Calculate your total bill below.</li>
+                        <li>Send the total amount via Vodafone Cash to <strong className="text-primary">01127494696</strong>.</li>
+                        <li>Take a screenshot of the transaction confirmation.</li>
+                        <li>Upload the screenshot below as proof of payment.</li>
+                    </ol>
+                    </div>
+                    <FormField
+                    control={form.control}
+                    name="receipt"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Upload Receipt Screenshot</FormLabel>
+                        <FormControl>
+                            <Input type="file" {...receiptRef} />
+                        </FormControl>
+                        <FormDescription>
+                            Please upload the screenshot of your Vodafone Cash transaction.
+                        </FormDescription>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                </CardContent>
             </Card>
         </fieldset>
 
-        <Card className="sticky bottom-0">
+        <Card className="sticky bottom-0 shadow-2xl">
           <CardContent className="p-4 flex items-center justify-between">
               <div>
                 <p className="text-lg font-semibold">Total Bill</p>

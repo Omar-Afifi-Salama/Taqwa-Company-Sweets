@@ -18,6 +18,7 @@ export async function submitOrder(formData: FormData) {
         return { error: "The application's backend is not configured correctly. Please contact support." };
     }
 
+    const name = formData.get('name') as string;
     const dormNumber = formData.get('dormNumber') as string;
     const receiptFile = formData.get('receipt') as File | null;
     
@@ -58,6 +59,7 @@ export async function submitOrder(formData: FormData) {
 
     try {
         await addDoc(collection(db, "orders"), {
+            name,
             dormNumber,
             items: orderedItems,
             total: serverTotal,
@@ -72,6 +74,7 @@ export async function submitOrder(formData: FormData) {
 
     
     const queryParams = new URLSearchParams({
+        name,
         dorm: dormNumber,
         total: String(serverTotal),
         items: JSON.stringify(orderedItems),

@@ -12,6 +12,7 @@ type OrderItem = {
 
 function ConfirmationContent({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
     const total = searchParams.total ? Number(searchParams.total) : 0;
+    const name = searchParams.name as string || 'N/A';
     const dorm = searchParams.dorm as string || 'N/A';
     let items: OrderItem[] = [];
     try {
@@ -26,12 +27,13 @@ function ConfirmationContent({ searchParams }: { searchParams: { [key: string]: 
                 <CardHeader className="items-center text-center">
                     <CheckCircle className="w-16 h-16 text-green-500 mb-4" />
                     <CardTitle className="text-3xl">Order Confirmed!</CardTitle>
-                    <CardDescription>Thank you for your order. Please take a screenshot of this receipt for your records.</CardDescription>
+                    <CardDescription>Thank you for your order, {name}. Please take a screenshot of this receipt for your records.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <Separator />
                     <div className="space-y-2">
                         <h3 className="font-semibold">Order Summary</h3>
+                        <p><span className="text-muted-foreground">Name:</span> {name}</p>
                         <p><span className="text-muted-foreground">Dorm / Delivery Address:</span> {dorm}</p>
                     </div>
                     <div className="space-y-4">
