@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, MessageSquareText } from 'lucide-react';
 
 type OrderItem = {
     id: string;
@@ -15,6 +15,7 @@ function ConfirmationContent({ searchParams }: { searchParams: { [key: string]: 
     const name = searchParams.name as string || 'N/A';
     const phone = searchParams.phone as string || 'N/A';
     const room = searchParams.room as string || 'N/A';
+    const orderNumber = searchParams.orderNumber as string || 'N/A';
     let items: OrderItem[] = [];
     try {
         items = searchParams.items ? JSON.parse(searchParams.items as string) : [];
@@ -28,9 +29,18 @@ function ConfirmationContent({ searchParams }: { searchParams: { [key: string]: 
                 <CardHeader className="items-center text-center">
                     <CheckCircle className="w-16 h-16 text-green-500 mb-4" />
                     <CardTitle className="text-3xl">Order Confirmed!</CardTitle>
-                    <CardDescription>Thank you for your order, {name}. Please take a screenshot of this receipt for your records.</CardDescription>
+                    <CardDescription>Thank you for your order, {name}. Please follow the final step below.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
+                     <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6 text-center">
+                        <MessageSquareText className="w-12 h-12 text-primary mx-auto mb-4" />
+                        <h3 className="text-2xl font-bold">Your Order Number is:</h3>
+                        <p className="text-6xl font-extrabold text-primary my-2">{orderNumber}</p>
+                        <p className="text-muted-foreground">
+                            Please send your <span className="font-semibold text-foreground">Full Name</span> and this <span className="font-semibold text-foreground">Order Number</span> via WhatsApp to <strong className="text-primary">01127494696</strong> to finalize your order.
+                        </p>
+                    </div>
+
                     <Separator />
                     <div className="space-y-2">
                         <h3 className="font-semibold">Order Summary</h3>

@@ -2,8 +2,7 @@
 
 import { redirect } from 'next/navigation';
 import { products } from '@/lib/products';
-import { db, storage } from '@/lib/firebase';
-import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
+import { db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 type OrderItem = {
@@ -14,14 +13,18 @@ type OrderItem = {
 }
 
 export async function submitOrder(formData: FormData) {
-    if (!db || !storage) {
+    if (!db) {
         return { error: "The application's backend is not configured correctly. Please contact support." };
     }
 
     const name = formData.get('name') as string;
     const phoneNumber = formData.get('phoneNumber') as string;
     const roomNumber = formData.get('roomNumber') as string;
-    const receiptFile = formData.get('receipt') as File | null;
+    const paymentConfirmed = formData.get('paymentConfirmation') === 'true';
+
+    if (!paymentConfirmed) {
+        return { error: 'You must confirm that you have sent payment.' };
+    }
     
     const orderedItems: OrderItem[] = [];
     let serverTotal = 0;
@@ -43,20 +46,7 @@ export async function submitOrder(formData: FormData) {
         return { error: 'No items were selected.' };
     }
 
-    if (!receiptFile || receiptFile.size === 0) {
-        return { error: 'A receipt is required as proof of payment.' };
-    }
-
-    let receiptUrl = '';
-    try {
-        const storageRef = ref(storage, `receipts/${Date.now()}_${receiptFile.name}`);
-        const snapshot = await uploadBytes(storageRef, receiptFile);
-        receiptUrl = await getDownloadURL(snapshot.ref);
-    } catch (error) {
-        console.error("Error uploading receipt: ", error);
-        return { error: 'There was an error uploading your receipt. Please try again.' };
-    }
-
+    const orderNumber = Math.floor(10 + Math.random() * 90);
 
     try {
         await addDoc(collection(db, "orders"), {
@@ -65,7 +55,7 @@ export async function submitOrder(formData: FormData) {
             roomNumber,
             items: orderedItems,
             total: serverTotal,
-            receiptUrl: receiptUrl,
+            orderNumber: orderNumber,
             status: 'pending',
             createdAt: serverTimestamp(),
         });
@@ -81,6 +71,7 @@ export async function submitOrder(formData: FormData) {
         room: roomNumber,
         total: String(serverTotal),
         items: JSON.stringify(orderedItems),
+        orderNumber: String(orderNumber),
     });
 
     redirect(`/confirmation?${queryParams.toString()}`);

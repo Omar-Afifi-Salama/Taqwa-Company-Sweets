@@ -22,6 +22,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { submitOrder } from "@/app/actions";
 import { useToast } from "@/hooks/use-toast";
 import { isFirebaseConfigured } from "@/lib/firebase";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const formSchema = z.object({
   tiramisu_nutella: z.coerce.number().int().min(0).default(0),
@@ -31,13 +32,9 @@ const formSchema = z.object({
   name: z.string().min(1, { message: "Name is required." }),
   phoneNumber: z.string().regex(/^01[0125][0-9]{8}$/, { message: "Please enter a valid 11-digit Egyptian phone number." }),
   roomNumber: z.string().length(3, {message: "Room number must be 3 digits."}).regex(/^[0-9]+$/, { message: "Only numbers are allowed." }),
-  receipt: z.any()
-    .refine((files) => files?.length >= 1, "Receipt image is required.")
-    .refine((files) => files?.[0]?.size <= 5000000, `Max file size is 5MB.`)
-    .refine(
-      (files) => ["image/jpeg", "image/png", "image/jpg"].includes(files?.[0]?.type),
-      "Only .jpg, .jpeg, and .png formats are supported."
-    ),
+  paymentConfirmation: z.boolean().refine((val) => val === true, {
+    message: "You must confirm payment before placing the order.",
+  }),
 });
 
 type OrderFormValues = z.infer<typeof formSchema>;
@@ -58,6 +55,7 @@ export function OrderForm({ products }: { products: Product[] }) {
       name: "",
       phoneNumber: "",
       roomNumber: "",
+      paymentConfirmation: false,
     },
   });
 
@@ -71,20 +69,14 @@ export function OrderForm({ products }: { products: Product[] }) {
     setTotal(newTotal);
   }, [watchedValues, products]);
 
-  const receiptRef = form.register("receipt");
-
   const onSubmit = (data: OrderFormValues) => {
     const formData = new FormData();
     let hasItems = false;
     Object.entries(data).forEach(([key, value]) => {
-      if (key === 'receipt' && value && value.length > 0) {
-        formData.append(key, value[0]);
-      } else if (key !== 'receipt') {
         formData.append(key, String(value));
         if (products.some(p => p.id === key) && Number(value) > 0) {
           hasItems = true;
         }
-      }
     });
 
     if (!hasItems) {
@@ -226,23 +218,27 @@ export function OrderForm({ products }: { products: Product[] }) {
                     <ol className="list-decimal list-inside text-muted-foreground space-y-1 mt-2">
                         <li>Calculate your total bill below.</li>
                         <li>Send the total amount via Vodafone Cash to <strong className="text-primary">01127494696</strong>.</li>
-                        <li>Take a screenshot of the transaction confirmation.</li>
-                        <li>Upload the screenshot below as proof of payment.</li>
+                        <li>Send a screenshot of the transaction confirmation via WhatsApp to the same number.</li>
+                        <li>Check the box below to confirm you've paid and sent the receipt.</li>
                     </ol>
                     </div>
                     <FormField
                     control={form.control}
-                    name="receipt"
+                    name="paymentConfirmation"
                     render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Upload Receipt Screenshot</FormLabel>
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow-sm">
                         <FormControl>
-                            <Input type="file" {...receiptRef} />
+                            <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                            />
                         </FormControl>
-                        <FormDescription>
-                            Please upload the screenshot of your Vodafone Cash transaction.
-                        </FormDescription>
-                        <FormMessage />
+                        <div className="space-y-1 leading-none">
+                            <FormLabel>
+                            I confirm I have sent the payment and receipt screenshot via WhatsApp.
+                            </FormLabel>
+                             <FormMessage />
+                        </div>
                         </FormItem>
                     )}
                     />
