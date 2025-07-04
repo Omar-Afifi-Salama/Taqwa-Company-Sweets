@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Sweet Treats Corner',
+  title: 'Taqwa company Sweets',
   description: 'Your one-stop shop for delicious treats!',
 };
 
