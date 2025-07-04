@@ -33,11 +33,12 @@ const formSchema = z.object({
   water: z.coerce.number().int().min(0).default(0),
   dormNumber: z.string().min(1, { message: "Dorm number is required." }),
   receipt: z.any()
-    .refine((file) => file?.[0]?.size <= 5000000, `Max file size is 5MB.`)
+    .refine((files) => files?.length >= 1, "Receipt image is required.")
+    .refine((files) => files?.[0]?.size <= 5000000, `Max file size is 5MB.`)
     .refine(
-      (file) => ["image/jpeg", "image/png", "image/jpg"].includes(file?.[0]?.type),
+      (files) => ["image/jpeg", "image/png", "image/jpg"].includes(files?.[0]?.type),
       "Only .jpg, .jpeg, and .png formats are supported."
-    ).optional(),
+    ),
 });
 
 type OrderFormValues = z.infer<typeof formSchema>;
@@ -212,7 +213,7 @@ export function OrderForm({ products }: { products: Product[] }) {
                 <p className="text-lg font-semibold">Total Bill</p>
                 <p className="text-3xl font-bold text-primary">{total} EGP</p>
               </div>
-            <Button type="submit" size="lg" disabled={isPending}>
+            <Button type="submit" size="lg" disabled={isPending || total === 0}>
               {isPending ? "Placing Order..." : "Place Order"}
             </Button>
           </CardContent>

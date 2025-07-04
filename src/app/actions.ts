@@ -1,7 +1,10 @@
 "use server";
 
 import { redirect } from 'next/navigation';
-import { products, Product } from '@/lib/products';
+import { products } from '@/lib/products';
+import { db, storage } from '@/lib/firebase';
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 type OrderItem = {
     id: string;
@@ -34,16 +37,35 @@ export async function submitOrder(formData: FormData) {
         return { error: 'No items were selected.' };
     }
 
-    // Here you would typically save the order to a database
-    // and upload the receipt file to a storage service.
-    // For this demo, we'll just log it.
+    if (!receiptFile || receiptFile.size === 0) {
+        return { error: 'A receipt is required as proof of payment.' };
+    }
 
-    console.log("--- New Order Received ---");
-    console.log("Dorm Number:", dormNumber);
-    console.log("Items:", orderedItems);
-    console.log("Total:", serverTotal);
-    console.log("Receipt Uploaded:", !!receiptFile && receiptFile.size > 0);
-    console.log("--------------------------");
+    let receiptUrl = '';
+    try {
+        const storageRef = ref(storage, `receipts/${Date.now()}_${receiptFile.name}`);
+        const snapshot = await uploadBytes(storageRef, receiptFile);
+        receiptUrl = await getDownloadURL(snapshot.ref);
+    } catch (error) {
+        console.error("Error uploading receipt: ", error);
+        return { error: 'There was an error uploading your receipt. Please try again.' };
+    }
+
+
+    try {
+        await addDoc(collection(db, "orders"), {
+            dormNumber,
+            items: orderedItems,
+            total: serverTotal,
+            receiptUrl: receiptUrl,
+            status: 'pending',
+            createdAt: serverTimestamp(),
+        });
+    } catch (e) {
+        console.error("Error adding document: ", e);
+        return { error: 'Could not save your order. Please try again later.' };
+    }
+
     
     const queryParams = new URLSearchParams({
         dorm: dormNumber,
