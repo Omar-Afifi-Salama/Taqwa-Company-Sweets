@@ -14,6 +14,10 @@ type OrderItem = {
 }
 
 export async function submitOrder(formData: FormData) {
+    if (!db || !storage) {
+        return { error: "The application's backend is not configured correctly. Please contact support." };
+    }
+
     const dormNumber = formData.get('dormNumber') as string;
     const receiptFile = formData.get('receipt') as File | null;
     

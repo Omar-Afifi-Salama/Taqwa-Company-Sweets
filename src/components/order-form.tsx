@@ -23,6 +23,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { submitOrder } from "@/app/actions";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
+import { isFirebaseConfigured } from "@/lib/firebase";
 
 const formSchema = z.object({
   chicken_shawarma: z.coerce.number().int().min(0).default(0),
@@ -47,6 +48,7 @@ export function OrderForm({ products }: { products: Product[] }) {
   const [total, setTotal] = useState(0);
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
+  const firebaseConfigured = isFirebaseConfigured();
 
   const form = useForm<OrderFormValues>({
     resolver: zodResolver(formSchema),
@@ -111,101 +113,103 @@ export function OrderForm({ products }: { products: Product[] }) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>Create Your Order</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {products.map((product) => (
+        <fieldset disabled={!firebaseConfigured} className="space-y-8">
+            <Card>
+            <CardHeader>
+                <CardTitle>Create Your Order</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {products.map((product) => (
+                    <FormField
+                    key={product.id}
+                    control={form.control}
+                    name={product.id as keyof OrderFormValues}
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel className="flex justify-between items-center">
+                            <span>{product.name}</span>
+                            <span className="text-muted-foreground font-normal">{product.price} EGP</span>
+                        </FormLabel>
+                        <FormControl>
+                            <div className="flex items-center gap-2">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="icon"
+                                className="h-10 w-10"
+                                onClick={() => field.onChange(Math.max(0, field.value - 1))}
+                            >
+                                <Minus className="h-4 w-4" />
+                            </Button>
+                            <Input {...field} type="number" min="0" className="text-center" />
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="icon"
+                                className="h-10 w-10"
+                                onClick={() => field.onChange(field.value + 1)}
+                            >
+                                <Plus className="h-4 w-4" />
+                            </Button>
+                            </div>
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                ))}
+                </div>
+                <Separator />
                 <FormField
-                  key={product.id}
-                  control={form.control}
-                  name={product.id as keyof OrderFormValues}
-                  render={({ field }) => (
+                control={form.control}
+                name="dormNumber"
+                render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="flex justify-between items-center">
-                        <span>{product.name}</span>
-                        <span className="text-muted-foreground font-normal">{product.price} EGP</span>
-                      </FormLabel>
-                      <FormControl>
-                        <div className="flex items-center gap-2">
-                           <Button
-                            type="button"
-                            variant="outline"
-                            size="icon"
-                            className="h-10 w-10"
-                            onClick={() => field.onChange(Math.max(0, field.value - 1))}
-                          >
-                            <Minus className="h-4 w-4" />
-                          </Button>
-                          <Input {...field} type="number" min="0" className="text-center" />
-                           <Button
-                            type="button"
-                            variant="outline"
-                            size="icon"
-                            className="h-10 w-10"
-                            onClick={() => field.onChange(field.value + 1)}
-                          >
-                            <Plus className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </FormControl>
-                      <FormMessage />
+                    <FormLabel>Dorm Number</FormLabel>
+                    <FormControl>
+                        <Input placeholder="e.g. Building 5, Room 302" {...field} />
+                    </FormControl>
+                    <FormMessage />
                     </FormItem>
-                  )}
+                )}
                 />
-              ))}
-            </div>
-            <Separator />
-            <FormField
-              control={form.control}
-              name="dormNumber"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Dorm Number</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g. Building 5, Room 302" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </CardContent>
-        </Card>
+            </CardContent>
+            </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Payment</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <p className="font-semibold">Instructions:</p>
-              <ol className="list-decimal list-inside text-muted-foreground space-y-1 mt-2">
-                <li>Calculate your total bill below.</li>
-                <li>Send the total amount via Vodafone Cash to <strong className="text-primary">01012345678</strong>.</li>
-                <li>Take a screenshot of the transaction confirmation.</li>
-                <li>Upload the screenshot below as proof of payment.</li>
-              </ol>
-            </div>
-            <FormField
-              control={form.control}
-              name="receipt"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Upload Receipt Screenshot</FormLabel>
-                  <FormControl>
-                    <Input type="file" {...receiptRef} />
-                  </FormControl>
-                  <FormDescription>
-                    Please upload the screenshot of your Vodafone Cash transaction.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </CardContent>
-        </Card>
+            <Card>
+            <CardHeader>
+                <CardTitle>Payment</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <div>
+                <p className="font-semibold">Instructions:</p>
+                <ol className="list-decimal list-inside text-muted-foreground space-y-1 mt-2">
+                    <li>Calculate your total bill below.</li>
+                    <li>Send the total amount via Vodafone Cash to <strong className="text-primary">01012345678</strong>.</li>
+                    <li>Take a screenshot of the transaction confirmation.</li>
+                    <li>Upload the screenshot below as proof of payment.</li>
+                </ol>
+                </div>
+                <FormField
+                control={form.control}
+                name="receipt"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Upload Receipt Screenshot</FormLabel>
+                    <FormControl>
+                        <Input type="file" {...receiptRef} />
+                    </FormControl>
+                    <FormDescription>
+                        Please upload the screenshot of your Vodafone Cash transaction.
+                    </FormDescription>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+            </CardContent>
+            </Card>
+        </fieldset>
 
         <Card className="sticky bottom-0">
           <CardContent className="p-4 flex items-center justify-between">
@@ -213,7 +217,7 @@ export function OrderForm({ products }: { products: Product[] }) {
                 <p className="text-lg font-semibold">Total Bill</p>
                 <p className="text-3xl font-bold text-primary">{total} EGP</p>
               </div>
-            <Button type="submit" size="lg" disabled={isPending || total === 0}>
+            <Button type="submit" size="lg" disabled={isPending || total === 0 || !firebaseConfigured}>
               {isPending ? "Placing Order..." : "Place Order"}
             </Button>
           </CardContent>
