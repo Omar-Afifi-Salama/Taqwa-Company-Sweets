@@ -4,9 +4,10 @@ import { useEffect, useState, useTransition } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { ChevronsUpDown, Minus, Plus } from "lucide-react";
+import { Minus, Plus } from "lucide-react";
 
 import type { Product } from "@/lib/products";
+import { products } from "@/lib/products";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,8 +30,8 @@ const formSchema = z.object({
   tiramisu_nutella: z.coerce.number().int().min(0).default(0),
   tiramisu_white_chocolate: z.coerce.number().int().min(0).default(0),
   tiramisu_lotus: z.coerce.number().int().min(0).default(0),
-  tiramisu_pistachio: z.coerce.number().int().min(0).default(0),
-  dormNumber: z.string().min(1, { message: "Dorm number is required." }),
+  tiramisu_kit_kat: z.coerce.number().int().min(0).default(0),
+  dormNumber: z.string().min(1, { message: "Dorm number is required." }).regex(/^[0-9]+$/, { message: "Only numbers are allowed." }),
   receipt: z.any()
     .refine((files) => files?.length >= 1, "Receipt image is required.")
     .refine((files) => files?.[0]?.size <= 5000000, `Max file size is 5MB.`)
@@ -54,7 +55,7 @@ export function OrderForm({ products }: { products: Product[] }) {
       tiramisu_nutella: 0,
       tiramisu_white_chocolate: 0,
       tiramisu_lotus: 0,
-      tiramisu_pistachio: 0,
+      tiramisu_kit_kat: 0,
       dormNumber: "",
     },
   });
@@ -164,7 +165,7 @@ export function OrderForm({ products }: { products: Product[] }) {
                     <FormItem>
                     <FormLabel>Dorm Number</FormLabel>
                     <FormControl>
-                        <Input placeholder="e.g. Building 5, Room 302" {...field} />
+                        <Input placeholder="302" type="text" inputMode="numeric" pattern="[0-9]*" {...field} />
                     </FormControl>
                     <FormMessage />
                     </FormItem>
