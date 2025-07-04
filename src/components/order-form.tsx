@@ -1,14 +1,12 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import Image from "next/image";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Minus, Plus } from "lucide-react";
 
 import type { Product } from "@/lib/products";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -31,6 +29,7 @@ const formSchema = z.object({
   tiramisu_lotus: z.coerce.number().int().min(0).default(0),
   tiramisu_pistachio: z.coerce.number().int().min(0).default(0),
   name: z.string().min(1, { message: "Name is required." }),
+  phoneNumber: z.string().regex(/^01[0125][0-9]{8}$/, { message: "Please enter a valid 11-digit Egyptian phone number." }),
   dormNumber: z.string().length(3, {message: "Dorm number must be 3 digits."}).regex(/^[0-9]+$/, { message: "Only numbers are allowed." }),
   receipt: z.any()
     .refine((files) => files?.length >= 1, "Receipt image is required.")
@@ -57,6 +56,7 @@ export function OrderForm({ products }: { products: Product[] }) {
       tiramisu_lotus: 0,
       tiramisu_pistachio: 0,
       name: "",
+      phoneNumber: "",
       dormNumber: "",
     },
   });
@@ -120,9 +120,6 @@ export function OrderForm({ products }: { products: Product[] }) {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {products.map((product) => (
                         <Card key={product.id} className="overflow-hidden flex flex-col">
-                             <div className="relative aspect-video w-full">
-                                <Image src={product.image} alt={product.name} layout="fill" objectFit="cover" data-ai-hint={product.dataAiHint} />
-                            </div>
                             <div className="p-4 space-y-4 flex flex-col flex-grow">
                                 <FormField
                                     control={form.control}
@@ -185,6 +182,19 @@ export function OrderForm({ products }: { products: Product[] }) {
                         <FormLabel>Full Name</FormLabel>
                         <FormControl>
                             <Input placeholder="John Doe" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                    <FormField
+                    control={form.control}
+                    name="phoneNumber"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Phone Number</FormLabel>
+                        <FormControl>
+                            <Input placeholder="01xxxxxxxxx" type="tel" {...field} />
                         </FormControl>
                         <FormMessage />
                         </FormItem>

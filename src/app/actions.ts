@@ -19,6 +19,7 @@ export async function submitOrder(formData: FormData) {
     }
 
     const name = formData.get('name') as string;
+    const phoneNumber = formData.get('phoneNumber') as string;
     const dormNumber = formData.get('dormNumber') as string;
     const receiptFile = formData.get('receipt') as File | null;
     
@@ -60,6 +61,7 @@ export async function submitOrder(formData: FormData) {
     try {
         await addDoc(collection(db, "orders"), {
             name,
+            phoneNumber,
             dormNumber,
             items: orderedItems,
             total: serverTotal,
@@ -75,6 +77,7 @@ export async function submitOrder(formData: FormData) {
     
     const queryParams = new URLSearchParams({
         name,
+        phone: phoneNumber,
         dorm: dormNumber,
         total: String(serverTotal),
         items: JSON.stringify(orderedItems),
