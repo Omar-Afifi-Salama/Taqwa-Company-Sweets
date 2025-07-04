@@ -26,12 +26,10 @@ import { Separator } from "@/components/ui/separator";
 import { isFirebaseConfigured } from "@/lib/firebase";
 
 const formSchema = z.object({
-  nutella: z.coerce.number().int().min(0).default(0),
-  white_chocolate: z.coerce.number().int().min(0).default(0),
-  lotus: z.coerce.number().int().min(0).default(0),
-  kit_kat: z.coerce.number().int().min(0).default(0),
-  caramel: z.coerce.number().int().min(0).default(0),
-  brownie: z.coerce.number().int().min(0).default(0),
+  tiramisu_nutella: z.coerce.number().int().min(0).default(0),
+  tiramisu_white_chocolate: z.coerce.number().int().min(0).default(0),
+  tiramisu_lotus: z.coerce.number().int().min(0).default(0),
+  tiramisu_pistachio: z.coerce.number().int().min(0).default(0),
   dormNumber: z.string().min(1, { message: "Dorm number is required." }),
   receipt: z.any()
     .refine((files) => files?.length >= 1, "Receipt image is required.")
@@ -53,12 +51,10 @@ export function OrderForm({ products }: { products: Product[] }) {
   const form = useForm<OrderFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      nutella: 0,
-      white_chocolate: 0,
-      lotus: 0,
-      kit_kat: 0,
-      caramel: 0,
-      brownie: 0,
+      tiramisu_nutella: 0,
+      tiramisu_white_chocolate: 0,
+      tiramisu_lotus: 0,
+      tiramisu_pistachio: 0,
       dormNumber: "",
     },
   });

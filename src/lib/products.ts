@@ -5,10 +5,8 @@ export type Product = {
 };
 
 export const products: Product[] = [
-    { id: 'nutella', name: 'Nutella', price: 45 },
-    { id: 'white_chocolate', name: 'White Chocolate', price: 45 },
-    { id: 'lotus', name: 'Lotus', price: 45 },
-    { id: 'kit_kat', name: 'Kit-Kat', price: 40 },
-    { id: 'caramel', name: 'Caramel', price: 40 },
-    { id: 'brownie', name: 'Brownie', price: 35 },
+    { id: 'tiramisu_nutella', name: 'Tiramisù Nutella', price: 35 },
+    { id: 'tiramisu_white_chocolate', name: 'Tiramisù White Chocolate', price: 35 },
+    { id: 'tiramisu_lotus', name: 'Tiramisù Lotus', price: 35 },
+    { id: 'tiramisu_pistachio', name: 'Tiramisù Pistachio', price: 45 },
 ];
