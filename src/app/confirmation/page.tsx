@@ -37,7 +37,7 @@ function ConfirmationContent({ searchParams }: { searchParams: { [key: string]: 
                         <h3 className="text-2xl font-bold">Your Order Number is:</h3>
                         <p className="text-6xl font-extrabold text-primary my-2">{orderNumber}</p>
                         <p className="text-muted-foreground">
-                            Please send your <span className="font-semibold text-foreground">Full Name</span> and this <span className="font-semibold text-foreground">Order Number</span> via WhatsApp to <strong className="text-primary">01127494696</strong> to finalize your order.
+                            Please send this <span className="font-semibold text-foreground">Order Number</span> via WhatsApp to <strong className="text-primary">01127494696</strong> to finalize your order.
                         </p>
                     </div>
 

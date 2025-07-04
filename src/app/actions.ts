@@ -3,7 +3,7 @@
 import { redirect } from 'next/navigation';
 import { products } from '@/lib/products';
 import { db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, doc, runTransaction, serverTimestamp } from "firebase/firestore";
 
 type OrderItem = {
     id: string;
@@ -46,33 +46,48 @@ export async function submitOrder(formData: FormData) {
         return { error: 'No items were selected.' };
     }
 
-    const orderNumber = Math.floor(10 + Math.random() * 90);
-
     try {
-        await addDoc(collection(db, "orders"), {
-            name,
-            phoneNumber,
-            roomNumber,
-            items: orderedItems,
-            total: serverTotal,
-            orderNumber: orderNumber,
-            status: 'pending',
-            createdAt: serverTimestamp(),
+        const counterRef = doc(db, "counters", "orderNumber");
+        const newOrderRef = doc(collection(db, "orders"));
+
+        const orderNumber = await runTransaction(db, async (transaction) => {
+            const counterDoc = await transaction.get(counterRef);
+            
+            let newCount = 1;
+            if (counterDoc.exists()) {
+                const currentCount = counterDoc.data().current;
+                newCount = currentCount >= 99 ? 1 : currentCount + 1;
+            }
+            
+            transaction.set(counterRef, { current: newCount });
+
+            transaction.set(newOrderRef, {
+                name,
+                phoneNumber,
+                roomNumber,
+                items: orderedItems,
+                total: serverTotal,
+                orderNumber: newCount,
+                status: 'pending',
+                createdAt: serverTimestamp(),
+            });
+            
+            return newCount;
         });
+        
+        const queryParams = new URLSearchParams({
+            name,
+            phone: phoneNumber,
+            room: roomNumber,
+            total: String(serverTotal),
+            items: JSON.stringify(orderedItems),
+            orderNumber: String(orderNumber).padStart(2, '0'),
+        });
+
+        redirect(`/confirmation?${queryParams.toString()}`);
+
     } catch (e) {
         console.error("Error adding document: ", e);
         return { error: 'Could not save your order. Please try again later.' };
     }
-
-    
-    const queryParams = new URLSearchParams({
-        name,
-        phone: phoneNumber,
-        room: roomNumber,
-        total: String(serverTotal),
-        items: JSON.stringify(orderedItems),
-        orderNumber: String(orderNumber),
-    });
-
-    redirect(`/confirmation?${queryParams.toString()}`);
 }
