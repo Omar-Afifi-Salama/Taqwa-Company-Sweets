@@ -14,7 +14,7 @@ function ConfirmationContent({ searchParams }: { searchParams: { [key: string]: 
     const total = searchParams.total ? Number(searchParams.total) : 0;
     const name = searchParams.name as string || 'N/A';
     const phone = searchParams.phone as string || 'N/A';
-    const dorm = searchParams.dorm as string || 'N/A';
+    const room = searchParams.room as string || 'N/A';
     let items: OrderItem[] = [];
     try {
         items = searchParams.items ? JSON.parse(searchParams.items as string) : [];
@@ -36,7 +36,7 @@ function ConfirmationContent({ searchParams }: { searchParams: { [key: string]: 
                         <h3 className="font-semibold">Order Summary</h3>
                         <p><span className="text-muted-foreground">Name:</span> {name}</p>
                         <p><span className="text-muted-foreground">Phone Number:</span> {phone}</p>
-                        <p><span className="text-muted-foreground">Dorm / Delivery Address:</span> {dorm}</p>
+                        <p><span className="text-muted-foreground">Room / Delivery Address:</span> {room}</p>
                     </div>
                     <div className="space-y-4">
                         {items.map(item => (

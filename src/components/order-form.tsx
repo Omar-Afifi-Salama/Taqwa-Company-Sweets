@@ -30,7 +30,7 @@ const formSchema = z.object({
   tiramisu_pistachio: z.coerce.number().int().min(0).default(0),
   name: z.string().min(1, { message: "Name is required." }),
   phoneNumber: z.string().regex(/^01[0125][0-9]{8}$/, { message: "Please enter a valid 11-digit Egyptian phone number." }),
-  dormNumber: z.string().length(3, {message: "Dorm number must be 3 digits."}).regex(/^[0-9]+$/, { message: "Only numbers are allowed." }),
+  roomNumber: z.string().length(3, {message: "Room number must be 3 digits."}).regex(/^[0-9]+$/, { message: "Only numbers are allowed." }),
   receipt: z.any()
     .refine((files) => files?.length >= 1, "Receipt image is required.")
     .refine((files) => files?.[0]?.size <= 5000000, `Max file size is 5MB.`)
@@ -57,7 +57,7 @@ export function OrderForm({ products }: { products: Product[] }) {
       tiramisu_pistachio: 0,
       name: "",
       phoneNumber: "",
-      dormNumber: "",
+      roomNumber: "",
     },
   });
 
@@ -202,10 +202,10 @@ export function OrderForm({ products }: { products: Product[] }) {
                     />
                     <FormField
                     control={form.control}
-                    name="dormNumber"
+                    name="roomNumber"
                     render={({ field }) => (
                         <FormItem>
-                        <FormLabel>Dorm Number</FormLabel>
+                        <FormLabel>Room Number</FormLabel>
                         <FormControl>
                             <Input placeholder="302" type="text" inputMode="numeric" maxLength={3} {...field} />
                         </FormControl>
