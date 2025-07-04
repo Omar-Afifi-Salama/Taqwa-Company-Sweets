@@ -3,6 +3,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Separator } from "@/components/ui/separator";
 import { CheckCircle, MessageSquareText } from 'lucide-react';
 
+export const runtime = 'edge';
+
 type OrderItem = {
     id: string;
     name: string;
